@@ -1,0 +1,6 @@
+@echo off
+echo Compilando...
+javac -d bin -sourcepath src src/app/Main.java
+echo Executando...
+java -cp bin app.Main
+pause
