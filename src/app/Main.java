@@ -886,13 +886,20 @@ public class Main {
     }
 
     private static void guardarDados() {
-        try {
-            new ObjectOutputStream(new FileOutputStream("utilizadores.dat")).writeObject(utilizadores);
-            new ObjectOutputStream(new FileOutputStream("khikhipas.dat")).writeObject(khikhipas);
-            new ObjectOutputStream(new FileOutputStream("khikhitas.dat")).writeObject(khikhitas);
-            new ObjectOutputStream(new FileOutputStream("khikhivis.dat")).writeObject(khikhivis);
-            new ObjectOutputStream(new FileOutputStream("agendamentos.dat")).writeObject(agendamentos);
-            new ObjectOutputStream(new FileOutputStream("recibos.dat")).writeObject(recibos);
+        try (
+            ObjectOutputStream outUtilizadores = new ObjectOutputStream(new FileOutputStream("utilizadores.dat"));
+            ObjectOutputStream outKhikhipas = new ObjectOutputStream(new FileOutputStream("khikhipas.dat"));
+            ObjectOutputStream outKhikhitas = new ObjectOutputStream(new FileOutputStream("khikhitas.dat"));
+            ObjectOutputStream outKhikhivis = new ObjectOutputStream(new FileOutputStream("khikhivis.dat"));
+            ObjectOutputStream outAgendamentos = new ObjectOutputStream(new FileOutputStream("agendamentos.dat"));
+            ObjectOutputStream outRecibos = new ObjectOutputStream(new FileOutputStream("recibos.dat"))
+        ) {
+            outUtilizadores.writeObject(utilizadores);
+            outKhikhipas.writeObject(khikhipas);
+            outKhikhitas.writeObject(khikhitas);
+            outKhikhivis.writeObject(khikhivis);
+            outAgendamentos.writeObject(agendamentos);
+            outRecibos.writeObject(recibos);
             System.out.println("Todos os dados foram guardados com sucesso.");
         } catch (IOException e) {
             System.out.println("Erro ao guardar dados: " + e.getMessage());
@@ -909,18 +916,36 @@ public class Main {
             File f5 = new File("agendamentos.dat");
             File f6 = new File("recibos.dat");
 
-            if (f1.exists())
-                utilizadores = (List<Utilizador>) new ObjectInputStream(new FileInputStream(f1)).readObject();
-            if (f2.exists())
-                khikhipas = (List<Khikhipa>) new ObjectInputStream(new FileInputStream(f2)).readObject();
-            if (f3.exists())
-                khikhitas = (List<Khikhita>) new ObjectInputStream(new FileInputStream(f3)).readObject();
-            if (f4.exists())
-                khikhivis = (List<Khikhivi>) new ObjectInputStream(new FileInputStream(f4)).readObject();
-            if (f5.exists())
-                agendamentos = (List<TicketAgendamento>) new ObjectInputStream(new FileInputStream(f5)).readObject();
-            if (f6.exists())
-                recibos = (List<Recibo>) new ObjectInputStream(new FileInputStream(f6)).readObject();
+            if (f1.exists()) {
+                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f1))) {
+                    utilizadores = (List<Utilizador>) in.readObject();
+                }
+            }
+            if (f2.exists()) {
+                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f2))) {
+                    khikhipas = (List<Khikhipa>) in.readObject();
+                }
+            }
+            if (f3.exists()) {
+                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f3))) {
+                    khikhitas = (List<Khikhita>) in.readObject();
+                }
+            }
+            if (f4.exists()) {
+                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f4))) {
+                    khikhivis = (List<Khikhivi>) in.readObject();
+                }
+            }
+            if (f5.exists()) {
+                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f5))) {
+                    agendamentos = (List<TicketAgendamento>) in.readObject();
+                }
+            }
+            if (f6.exists()) {
+                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(f6))) {
+                    recibos = (List<Recibo>) in.readObject();
+                }
+            }
 
             System.out.println("Dados carregados com sucesso.");
         } catch (IOException | ClassNotFoundException e) {
