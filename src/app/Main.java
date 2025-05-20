@@ -40,13 +40,13 @@ public class Main {
             System.out.println("\n===== MENU PRINCIPAL =====");
             System.out.println("[1] Gestão de Utilizadores");
             System.out.println("[2] Gestão de Quiosques Khikhipa");
-            System.out.println("[3] Criar Agendamento Real");
-            System.out.println("[4] Listar Agendamentos");
-            System.out.println("[5] Emitir Recibo com base em Agendamento");
-            System.out.println("[6] Listar Recibos");
-            System.out.println("[7] Guardar dados");
-            System.out.println("[8] Gestão de Quiosques Khikhita");
-            System.out.println("[9] Gestão de Quiosques Khikhivi");
+            System.out.println("[3] Gestão de Quiosques Khikhita");
+            System.out.println("[4] Gestão de Quiosques Khikhivi");
+            System.out.println("[5] Criar Agendamento Real");
+            System.out.println("[6] Listar Agendamentos");
+            System.out.println("[7] Emitir Recibo com base em Agendamento");
+            System.out.println("[8] Listar Recibos");
+            System.out.println("[9] Guardar dados");
             System.out.println("[10] Tabela de Preços");
             System.out.println("[11] Gerar Relatório de Recibos");
             System.out.println("[12] Gerar relatório de agendamentos (.txt)");
@@ -76,15 +76,15 @@ public class Main {
     private static Utilizador autenticarUtilizador() {
         System.out.print("NIF: ");
         String nif = scanner.nextLine();
-        System.out.print("Contacto: ");
-        String contacto = scanner.nextLine();
 
         for (Utilizador u : utilizadores) {
-            if (u.getNif().equals(nif) && u.getContacto().equals(contacto)) {
+            if (u.getNif().equals(nif)) {
                 System.out.println("Autenticação bem-sucedida. Bem-vindo, " + u.getNome() + "!");
                 return u;
             }
         }
+
+        System.out.println("NIF não encontrado. A sair...");
         return null;
     }
 
@@ -408,7 +408,7 @@ public class Main {
         while (!voltar) {
             System.out.println("\n--- Menu Khikhipa ---");
             System.out.println("[1] Listar Khikhipas");
-            System.out.println("[2] Adicionar Khikhipa (exemplo)");
+            System.out.println("[2] Adicionar Khikhipa");
             System.out.println("[3] Editar Khikhipa");
             System.out.println("[4] Remover Khikhipa");
             System.out.println("[0] Voltar");
@@ -416,7 +416,7 @@ public class Main {
             String op = scanner.nextLine();
             switch (op) {
                 case "1" -> listarKhikhipas();
-                case "2" -> adicionarKhikhipaExemplo();
+                case "2" -> adicionarKhikhipa();
                 case "3" -> editarKhikhipa();
                 case "4" -> removerKhikhipa();
                 case "0" -> voltar = true;
@@ -455,6 +455,92 @@ public class Main {
         Khikhipa k = khikhipas.get(0); // ou escolhes da lista
         khikhipas.remove(k);
         System.out.println("Khikhipa removido.");
+    }
+
+    private static void listarKhikhipas() {
+        if (khikhipas.isEmpty()) {
+            System.out.println("Nenhum Khikhipa disponível.");
+            return;
+        }
+        for (Khikhipa k : khikhipas) {
+            System.out.println("- " + k.getNome() + " | Compartimentos: " + k.getCompartimentos().size());
+        }
+    }
+
+    /**
+     * Adiciona um quiosque Khikhipa com dados reais inseridos pelo utilizador.
+     */
+    private static void adicionarKhikhipa() {
+        System.out.println("\n=== Adicionar Khikhipa ===");
+
+        System.out.print("ID do quiosque: ");
+        String id = scanner.nextLine();
+
+        System.out.print("Nome do quiosque: ");
+        String nome = scanner.nextLine();
+
+        System.out.print("Rua: ");
+        String rua = scanner.nextLine();
+
+        System.out.print("Número da porta: ");
+        int porta = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Código Postal (formato NNNN-NNN): ");
+        String codPostal = scanner.nextLine();
+
+        System.out.print("Localidade: ");
+        String localidade = scanner.nextLine();
+
+        Morada morada = new Morada(rua, porta, codPostal, localidade);
+
+        // Responsável de manutenção
+        System.out.print("Nome do responsável de manutenção: ");
+        String nomeManutencao = scanner.nextLine();
+
+        System.out.print("Contacto de manutenção: ");
+        String contactoManutencao = scanner.nextLine();
+
+        Responsavel manutencao = new Responsavel(nomeManutencao, contactoManutencao);
+
+        // Responsável de higiene
+        System.out.print("Nome do responsável de higiene: ");
+        String nomeHigiene = scanner.nextLine();
+
+        System.out.print("Contacto de higiene: ");
+        String contactoHigiene = scanner.nextLine();
+
+        Responsavel higiene = new Responsavel(nomeHigiene, contactoHigiene);
+
+        // Compartimentos
+        System.out.print("Quantos compartimentos pretende adicionar? ");
+        int totalCompartimentos = Integer.parseInt(scanner.nextLine());
+
+        List<Compartimento> compartimentos = new ArrayList<>();
+        for (int i = 0; i < totalCompartimentos; i++) {
+            System.out.println("Compartimento #" + (i + 1));
+
+            System.out.print("ID do compartimento: ");
+            String idC = scanner.nextLine();
+
+            System.out.print("Está disponível? (true/false): ");
+            boolean disponivel = Boolean.parseBoolean(scanner.nextLine());
+
+            System.out.print("É modo entrega? (true/false): ");
+            boolean modoEntrega = Boolean.parseBoolean(scanner.nextLine());
+
+            System.out.print("Chave pública: ");
+            String chavePublica = scanner.nextLine();
+
+            System.out.print("Chave privada: ");
+            String chavePrivada = scanner.nextLine();
+
+            compartimentos.add(new Compartimento(idC, disponivel, modoEntrega, chavePublica, chavePrivada));
+        }
+
+        // Criar e adicionar o quiosque Khikhipa
+        Khikhipa novo = new Khikhipa(id, nome, morada, compartimentos, manutencao, higiene);
+        khikhipas.add(novo);
+        System.out.println("Khikhipa adicionado com sucesso.");
     }
 
     // --------------------------Khikhivi--------------------------//
@@ -548,14 +634,14 @@ public class Main {
         while (!voltar) {
             System.out.println("\n--- Menu Khikhita ---");
             System.out.println("[1] Listar Khikhitas");
-            System.out.println("[2] Adicionar Khikhita (exemplo)");
+            System.out.println("[2] Adicionar Khikhita");
             System.out.println("[3] Consultar morada do funcionário");
             System.out.println("[0] Voltar");
             System.out.print("Opção: ");
             String op = scanner.nextLine();
             switch (op) {
                 case "1" -> listarKhikhitas();
-                case "2" -> adicionarKhikhitaExemplo();
+                case "2" -> adicionarKhikhita();
                 case "3" -> consultarMoradaFuncionario();
                 case "0" -> voltar = true;
                 default -> System.out.println("Opção inválida.");
@@ -573,15 +659,52 @@ public class Main {
         }
     }
 
-    private static void adicionarKhikhitaExemplo() {
-        Morada morada = new Morada("Rua Tabaco", 5, "3500051", "Viseu");
-        Funcionario f = new Funcionario("Luciana", morada);
+    /**
+     * Adiciona um quiosque Khikhita com dados reais inseridos pelo utilizador.
+     */
+    private static void adicionarKhikhita() {
+        System.out.println("\n=== Adicionar Khikhita ===");
+
+        System.out.print("ID do quiosque: ");
+        String id = scanner.nextLine();
+
+        System.out.print("Nome do quiosque: ");
+        String nome = scanner.nextLine();
+
+        System.out.print("Rua: ");
+        String rua = scanner.nextLine();
+
+        System.out.print("Número da porta: ");
+        int porta = Integer.parseInt(scanner.nextLine());
+
+        System.out.print("Código Postal (formato NNNN-NNN): ");
+        String codPostal = scanner.nextLine();
+
+        System.out.print("Localidade: ");
+        String localidade = scanner.nextLine();
+
+        Morada morada = new Morada(rua, porta, codPostal, localidade);
+
+        System.out.print("Nome do funcionário: ");
+        String nomeFuncionario = scanner.nextLine();
+
+        Funcionario funcionario = new Funcionario(nomeFuncionario, morada);
+
         Map<String, Integer> limites = new HashMap<>();
-        limites.put("S", 5);
-        limites.put("M", 3);
-        Khikhita novo = new Khikhita("KHITA001", "Tabacaria Viseu", morada, f, limites);
+        System.out.print("Quantos tipos de caixas quer configurar? ");
+        int tipos = Integer.parseInt(scanner.nextLine());
+
+        for (int i = 0; i < tipos; i++) {
+            System.out.print("ID do tipo de caixa (ex: S, M, L): ");
+            String tipo = scanner.nextLine();
+            System.out.print("Número máximo de caixas do tipo " + tipo + ": ");
+            int max = Integer.parseInt(scanner.nextLine());
+            limites.put(tipo, max);
+        }
+
+        Khikhita novo = new Khikhita(id, nome, morada, funcionario, limites);
         khikhitas.add(novo);
-        System.out.println("Khikhita adicionado.");
+        System.out.println("Khikhita adicionado com sucesso.");
     }
 
     private static void consultarMoradaFuncionario() {
@@ -593,31 +716,10 @@ public class Main {
                 khikhitas.get(0).getFuncionario().getMorada().getRua());
     }
 
-    private static void listarKhikhipas() {
-        if (khikhipas.isEmpty()) {
-            System.out.println("Nenhum Khikhipa disponível.");
-            return;
-        }
-        for (Khikhipa k : khikhipas) {
-            System.out.println("- " + k.getNome() + " | Compartimentos: " + k.getCompartimentos().size());
-        }
-    }
-
-    private static void adicionarKhikhipaExemplo() {
-        Morada morada = new Morada("Rua Exemplo", 10, "3500050", "Viseu");
-        Responsavel man = new Responsavel("Carlos", "912345000");
-        Responsavel hig = new Responsavel("Ana", "913456000");
-        Compartimento c1 = new Compartimento("3504054200101", true, false, "PUB001", "PRIV001");
-        List<Compartimento> compartimentos = List.of(c1);
-        Khikhipa novo = new Khikhipa("350405420", "Khikhipa Demo", morada, compartimentos, man, hig);
-        khikhipas.add(novo);
-        System.out.println("Khikhipa de exemplo adicionado.");
-    }
-
     // --------------------------Agendamentos--------------------------//
     private static void criarAgendamentoReal() {
         if (utilizadores.size() < 2) {
-            System.out.println("É necessário pelo menos dois utilizadores (cliente e prestador).");
+            System.out.println("É necessário pelo menos dois utilizadores (cliente e parceiro).");
             return;
         }
 
@@ -887,13 +989,12 @@ public class Main {
 
     private static void guardarDados() {
         try (
-            ObjectOutputStream outUtilizadores = new ObjectOutputStream(new FileOutputStream("utilizadores.dat"));
-            ObjectOutputStream outKhikhipas = new ObjectOutputStream(new FileOutputStream("khikhipas.dat"));
-            ObjectOutputStream outKhikhitas = new ObjectOutputStream(new FileOutputStream("khikhitas.dat"));
-            ObjectOutputStream outKhikhivis = new ObjectOutputStream(new FileOutputStream("khikhivis.dat"));
-            ObjectOutputStream outAgendamentos = new ObjectOutputStream(new FileOutputStream("agendamentos.dat"));
-            ObjectOutputStream outRecibos = new ObjectOutputStream(new FileOutputStream("recibos.dat"))
-        ) {
+                ObjectOutputStream outUtilizadores = new ObjectOutputStream(new FileOutputStream("utilizadores.dat"));
+                ObjectOutputStream outKhikhipas = new ObjectOutputStream(new FileOutputStream("khikhipas.dat"));
+                ObjectOutputStream outKhikhitas = new ObjectOutputStream(new FileOutputStream("khikhitas.dat"));
+                ObjectOutputStream outKhikhivis = new ObjectOutputStream(new FileOutputStream("khikhivis.dat"));
+                ObjectOutputStream outAgendamentos = new ObjectOutputStream(new FileOutputStream("agendamentos.dat"));
+                ObjectOutputStream outRecibos = new ObjectOutputStream(new FileOutputStream("recibos.dat"))) {
             outUtilizadores.writeObject(utilizadores);
             outKhikhipas.writeObject(khikhipas);
             outKhikhitas.writeObject(khikhitas);
