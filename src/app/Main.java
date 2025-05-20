@@ -342,7 +342,7 @@ public class Main {
         Utilizador u2 = escolherUtilizador();
 
         if (u1 == u2) {
-            System.out.println("Não pode adicionar o mesmo utilizador.");
+            System.out.println("Não pode adicionar o mesmo utilizador a si próprio.");
             return;
         }
 
@@ -350,11 +350,23 @@ public class Main {
         String tipo = scanner.nextLine();
 
         if (tipo.equalsIgnoreCase("c")) {
-            u1.getClientes().add(u2);
-            System.out.println("Cliente adicionado com sucesso.");
+            boolean jaExiste = u1.getClientes().stream()
+                    .anyMatch(u -> u.getNif().equals(u2.getNif()));
+            if (jaExiste) {
+                System.out.println("Este utilizador já está associado como cliente.");
+            } else {
+                u1.getClientes().add(u2);
+                System.out.println("Cliente adicionado com sucesso.");
+            }
         } else if (tipo.equalsIgnoreCase("p")) {
-            u1.getParceiros().add(u2);
-            System.out.println("Parceiro adicionado com sucesso.");
+            boolean jaExiste = u1.getParceiros().stream()
+                    .anyMatch(u -> u.getNif().equals(u2.getNif()));
+            if (jaExiste) {
+                System.out.println("Este utilizador já está associado como parceiro.");
+            } else {
+                u1.getParceiros().add(u2);
+                System.out.println("Parceiro adicionado com sucesso.");
+            }
         } else {
             System.out.println("Opção inválida.");
         }
