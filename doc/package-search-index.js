@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"agendamentos"},{"l":"All Packages","u":"allpackages-index.html"},{"l":"app"},{"l":"areas"},{"l":"caixas"},{"l":"quiosques"},{"l":"recibos"},{"l":"suporte"},{"l":"utilizadores"}];updateSearchResults();

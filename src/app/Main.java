@@ -103,6 +103,8 @@ public class Main {
             System.out.println("[3] Editar utilizador");
             System.out.println("[4] Remover utilizador");
             System.out.println("[5] Listar caixas do utilizador");
+            System.out.println("[6] Adicionar cliente/parceiro");
+            System.out.println("[7] Listar clientes/parceiros");
             System.out.println("[0] Voltar");
             System.out.print("Opção: ");
             String op = scanner.nextLine();
@@ -112,6 +114,8 @@ public class Main {
                 case "3" -> editarUtilizador();
                 case "4" -> removerUtilizador();
                 case "5" -> listarCaixasDoUtilizador();
+                case "6" -> adicionarClienteOuParceiro();
+                case "7" -> listarClientesEParceiros();
                 case "0" -> voltar = true;
                 default -> System.out.println("Opção inválida.");
             }
@@ -129,20 +133,115 @@ public class Main {
     }
 
     private static void adicionarUtilizador() {
-        System.out.print("NIF: ");
-        String nif = scanner.nextLine();
-        System.out.print("Nome: ");
-        String nome = scanner.nextLine();
-        System.out.print("Email: ");
-        String email = scanner.nextLine();
-        System.out.print("Contacto: ");
-        String contacto = scanner.nextLine();
+        String nif;
+        while (true) {
+            System.out.print("NIF (9 dígitos): ");
+            nif = scanner.nextLine();
+
+            // Validar formato
+            if (!nif.matches("\\d{9}")) {
+                System.out.println("NIF inválido. Deve conter exatamente 9 dígitos numéricos.");
+                continue;
+            }
+
+            // Verificar duplicado
+            boolean nifRepetido = false;
+            for (Utilizador u : utilizadores) {
+                if (u.getNif().equals(nif)) {
+                    nifRepetido = true;
+                    break;
+                }
+            }
+            if (nifRepetido) {
+                System.out.println("Já existe um utilizador com este NIF.");
+                continue;
+            }
+
+            break;
+        }
+        String nome;
+        while (true) {
+            System.out.print("Nome: ");
+            nome = scanner.nextLine().trim();
+            if (nome.matches("^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ ]{1,}$")) {
+                break;
+            }
+            System.out.println("Nome inválido. Deve começar por uma letra e conter apenas letras e espaços.");
+        }
+        String email;
+        while (true) {
+            System.out.print("Email: ");
+            email = scanner.nextLine();
+
+            // Validar formato
+            if (!(email.contains("@") && email.indexOf('.') > email.indexOf('@'))) {
+                System.out.println("Email inválido. Deve conter '@' e '.' após o '@'.");
+                continue;
+            }
+
+            // Verificar duplicado
+            boolean emailRepetido = false;
+            for (Utilizador u : utilizadores) {
+                if (u.getEmail().equalsIgnoreCase(email)) {
+                    emailRepetido = true;
+                    break;
+                }
+            }
+            if (emailRepetido) {
+                System.out.println("Já existe um utilizador com este email.");
+                continue;
+            }
+
+            break;
+        }
+        String contacto;
+        while (true) {
+            System.out.print("Contacto (91/92/93/96 + 7 dígitos): ");
+            contacto = scanner.nextLine();
+
+            // Validar formato
+            if (!contacto.matches("^(91|92|93|96)\\d{7}$")) {
+                System.out.println("Contacto inválido. Deve ter 9 dígitos e começar por 91, 92, 93 ou 96.");
+                continue;
+            }
+
+            // Verificar duplicado
+            boolean contactoRepetido = false;
+            for (Utilizador u : utilizadores) {
+                if (u.getContacto().equals(contacto)) {
+                    contactoRepetido = true;
+                    break;
+                }
+            }
+            if (contactoRepetido) {
+                System.out.println("Já existe um utilizador com este contacto.");
+                continue;
+            }
+
+            break;
+        }
         System.out.print("Rua: ");
         String rua = scanner.nextLine();
-        System.out.print("Porta: ");
-        int porta = Integer.parseInt(scanner.nextLine());
-        System.out.print("Código Postal: ");
-        String codPostal = scanner.nextLine();
+        int porta;
+        while (true) {
+            System.out.print("Porta (número): ");
+            String input = scanner.nextLine();
+            try {
+                porta = Integer.parseInt(input);
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("Valor inválido. Introduza apenas um número inteiro para a porta.");
+            }
+        }
+        String codPostal;
+        while (true) {
+            System.out.print("Código Postal (formato NNNN-NNN): ");
+            codPostal = scanner.nextLine();
+            if (codPostal.matches("\\d{4}-\\d{3}")) {
+                break;
+            }
+            System.out.println("Código postal inválido. Ex: 3500-123");
+        }
         System.out.print("Localidade: ");
         String localidade = scanner.nextLine();
         Morada morada = new Morada(rua, porta, codPostal, localidade);
@@ -203,30 +302,93 @@ public class Main {
     }
 
     /**
- * Lista todas as caixas associadas a um utilizador escolhido.
- */
-private static void listarCaixasDoUtilizador() {
-    if (utilizadores.isEmpty()) {
-        System.out.println("Nenhum utilizador disponível.");
-        return;
+     * Lista todas as caixas associadas a um utilizador escolhido.
+     */
+    private static void listarCaixasDoUtilizador() {
+        if (utilizadores.isEmpty()) {
+            System.out.println("Nenhum utilizador disponível.");
+            return;
+        }
+
+        Utilizador u = escolherUtilizador();
+
+        List<Caixa> caixas = u.getCaixas();
+        if (caixas.isEmpty()) {
+            System.out.println("Este utilizador não tem caixas.");
+            return;
+        }
+
+        System.out.println("Caixas do utilizador " + u.getNome() + ":");
+        for (Caixa c : caixas) {
+            System.out.println("- ID: " + c.getId() +
+                    ", Tipo: " + c.getTipo().getId() +
+                    ", Ativa: " + (c.isAtiva() ? "Sim" : "Não"));
+        }
     }
 
-    Utilizador u = escolherUtilizador();
+    /**
+     * Adiciona uma relação de cliente ou parceiro a um utilizador.
+     */
+    private static void adicionarClienteOuParceiro() {
+        if (utilizadores.size() < 2) {
+            System.out.println("É necessário pelo menos 2 utilizadores.");
+            return;
+        }
 
-    List<Caixa> caixas = u.getCaixas();
-    if (caixas.isEmpty()) {
-        System.out.println("Este utilizador não tem caixas.");
-        return;
+        System.out.println("Escolha o utilizador principal:");
+        Utilizador u1 = escolherUtilizador();
+
+        System.out.println("Escolha o utilizador a adicionar como cliente/parceiro:");
+        Utilizador u2 = escolherUtilizador();
+
+        if (u1 == u2) {
+            System.out.println("Não pode adicionar o mesmo utilizador.");
+            return;
+        }
+
+        System.out.print("Adicionar como (c)liente ou (p)arceiro? ");
+        String tipo = scanner.nextLine();
+
+        if (tipo.equalsIgnoreCase("c")) {
+            u1.getClientes().add(u2);
+            System.out.println("Cliente adicionado com sucesso.");
+        } else if (tipo.equalsIgnoreCase("p")) {
+            u1.getParceiros().add(u2);
+            System.out.println("Parceiro adicionado com sucesso.");
+        } else {
+            System.out.println("Opção inválida.");
+        }
     }
 
-    System.out.println("Caixas do utilizador " + u.getNome() + ":");
-    for (Caixa c : caixas) {
-        System.out.println("- ID: " + c.getId() +
-                           ", Tipo: " + c.getTipo().getId() +
-                           ", Ativa: " + (c.isAtiva() ? "Sim" : "Não"));
-    }
-}
+    /**
+     * Lista os clientes e parceiros de um utilizador.
+     */
+    private static void listarClientesEParceiros() {
+        if (utilizadores.isEmpty()) {
+            System.out.println("Nenhum utilizador disponível.");
+            return;
+        }
 
+        Utilizador u = escolherUtilizador();
+
+        System.out.println("Clientes de " + u.getNome() + ":");
+        if (u.getClientes().isEmpty()) {
+            System.out.println(" - Nenhum cliente associado.");
+        } else {
+            for (Utilizador c : u.getClientes()) {
+                System.out.println(" - " + c.getNome() + " (NIF: " + c.getNif() + ")");
+            }
+        }
+
+        System.out.println("Parceiros de " + u.getNome() + ":");
+        if (u.getParceiros().isEmpty()) {
+            System.out.println(" - Nenhum parceiro associado.");
+        } else {
+            for (Utilizador p : u.getParceiros()) {
+                System.out.println(" - " + p.getNome() + " (NIF: " + p.getNif() + ")");
+            }
+        }
+    }
 
     // --------------------------Khikhivi--------------------------//
     private static void menuKhikhipa() {
@@ -315,39 +477,34 @@ private static void listarCaixasDoUtilizador() {
         }
     }
 
-  private static void adicionarKhikhivi() {
-    Morada morada = new Morada("Rua Oficina", 12, "3500052", "Viseu");
-    Responsavel man = new Responsavel("Vítor", "911000000");
-    Responsavel hig = new Responsavel("Rita", "914000000");
+    private static void adicionarKhikhivi() {
+        Morada morada = new Morada("Rua Oficina", 12, "3500052", "Viseu");
+        Responsavel man = new Responsavel("Vítor", "911000000");
+        Responsavel hig = new Responsavel("Rita", "914000000");
 
-    // Criar as 4 áreas fixas com alguns itens operacionais e outros avariados
-    List<AreaTrabalho> areas = new ArrayList<>();
+        // Criar as 4 áreas fixas com alguns itens operacionais e outros avariados
+        List<AreaTrabalho> areas = new ArrayList<>();
 
-    areas.add(new AreaTrabalho("auto", Arrays.asList(
-        new Item("Elevador Auto", true),
-        new Item("Ferramentas Auto", false)
-    )));
+        areas.add(new AreaTrabalho("auto", Arrays.asList(
+                new Item("Elevador Auto", true),
+                new Item("Ferramentas Auto", false))));
 
-    areas.add(new AreaTrabalho("carpintaria", Arrays.asList(
-        new Item("Mesa Carpintaria", true),
-        new Item("Serra Circular", true)
-    )));
+        areas.add(new AreaTrabalho("carpintaria", Arrays.asList(
+                new Item("Mesa Carpintaria", true),
+                new Item("Serra Circular", true))));
 
-    areas.add(new AreaTrabalho("moto", Arrays.asList(
-        new Item("Bancada Moto", false),
-        new Item("Compressor", true)
-    )));
+        areas.add(new AreaTrabalho("moto", Arrays.asList(
+                new Item("Bancada Moto", false),
+                new Item("Compressor", true))));
 
-    areas.add(new AreaTrabalho("eletrodoméstico", Arrays.asList(
-        new Item("Multímetro", true),
-        new Item("Chave Isolada", true)
-    )));
+        areas.add(new AreaTrabalho("eletrodoméstico", Arrays.asList(
+                new Item("Multímetro", true),
+                new Item("Chave Isolada", true))));
 
-    Khikhivi novo = new Khikhivi("KHIVI" + (khikhivis.size() + 1), "Khikhivi Oficinas", morada, areas, man, hig);
-    khikhivis.add(novo);
-    System.out.println("Khikhivi com 4 áreas adicionado.");
-}
-
+        Khikhivi novo = new Khikhivi("KHIVI" + (khikhivis.size() + 1), "Khikhivi Oficinas", morada, areas, man, hig);
+        khikhivis.add(novo);
+        System.out.println("Khikhivi com 4 áreas adicionado.");
+    }
 
     private static void verificarAreas() {
         if (khikhivis.isEmpty()) {
@@ -602,27 +759,27 @@ private static void listarCaixasDoUtilizador() {
      * O recibo inclui os detalhes do agendamento e os valores associados.
      */
     private static void gerarRelatorioAgendamentos() {
-    File relatorio = new File("relatorio_agendamentos.txt");
-    try (PrintWriter writer = new PrintWriter(relatorio)) {
-        writer.println("===== RELATÓRIO DE AGENDAMENTOS =====");
-        for (TicketAgendamento t : agendamentos) {
-            writer.println("Quiosque: " + t.getIdQuiosque());
-            writer.println("Compartimento/Área: " + t.getIdCompartimentoOuArea());
-            writer.println("Cliente: " + t.getIdSolicitante());
-            writer.println("Prestador: " + t.getIdPrestador());
-            writer.println("Tipo de Caixa: " + t.getTipoCaixa());
-            writer.println("Entrega 1: " + t.getDataEntrega1());
-            writer.println("Levantamento 1: " + t.getDataLevantamento1());
-            writer.println("Entrega 2: " + t.getDataEntrega2());
-            writer.println("Levantamento 2: " + t.getDataLevantamento2());
-            writer.println("--------------------------------------");
+        File relatorio = new File("relatorio_agendamentos.txt");
+        try (PrintWriter writer = new PrintWriter(relatorio)) {
+            writer.println("===== RELATÓRIO DE AGENDAMENTOS =====");
+            for (TicketAgendamento t : agendamentos) {
+                writer.println("Quiosque: " + t.getIdQuiosque());
+                writer.println("Compartimento/Área: " + t.getIdCompartimentoOuArea());
+                writer.println("Cliente: " + t.getIdSolicitante());
+                writer.println("Prestador: " + t.getIdPrestador());
+                writer.println("Tipo de Caixa: " + t.getTipoCaixa());
+                writer.println("Entrega 1: " + t.getDataEntrega1());
+                writer.println("Levantamento 1: " + t.getDataLevantamento1());
+                writer.println("Entrega 2: " + t.getDataEntrega2());
+                writer.println("Levantamento 2: " + t.getDataLevantamento2());
+                writer.println("--------------------------------------");
+            }
+            writer.println("Total de agendamentos: " + agendamentos.size());
+            System.out.println("Relatório de agendamentos gerado com sucesso: " + relatorio.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println("Erro ao escrever o relatório de agendamentos: " + e.getMessage());
         }
-        writer.println("Total de agendamentos: " + agendamentos.size());
-        System.out.println("Relatório de agendamentos gerado com sucesso: " + relatorio.getAbsolutePath());
-    } catch (IOException e) {
-        System.out.println("Erro ao escrever o relatório de agendamentos: " + e.getMessage());
     }
-}
 
     /**
      * Lista todos os recibos emitidos no sistema, com os detalhes
@@ -651,33 +808,33 @@ private static void listarCaixasDoUtilizador() {
             System.out.println("-----------------------------------");
         }
     }
-    
+
     /**
- * Gera um relatório em ficheiro .txt com todos os recibos emitidos.
- * O ficheiro será criado na raiz do projeto com o nome 'relatorio_recibos.txt'.
- */
-private static void gerarRelatorioRecibos() {
-    File relatorio = new File("relatorio_recibos.txt");
-    try (PrintWriter writer = new PrintWriter(relatorio)) {
-        writer.println("===== RELATÓRIO DE RECIBOS EMITIDOS =====");
-        for (Recibo r : recibos) {
-            writer.println("Recibo ID: " + r.getId());
-            writer.println("Data: " + r.getDataEmissao());
-            writer.println("Quiosque: " + r.getTicket().getIdQuiosque());
-            writer.println("Detalhes:");
-            for (Map.Entry<String, Double> entry : r.getValores().entrySet()) {
-                writer.printf(" - %s: %.2f €%n", entry.getKey(), entry.getValue());
+     * Gera um relatório em ficheiro .txt com todos os recibos emitidos.
+     * O ficheiro será criado na raiz do projeto com o nome 'relatorio_recibos.txt'.
+     */
+    private static void gerarRelatorioRecibos() {
+        File relatorio = new File("relatorio_recibos.txt");
+        try (PrintWriter writer = new PrintWriter(relatorio)) {
+            writer.println("===== RELATÓRIO DE RECIBOS EMITIDOS =====");
+            for (Recibo r : recibos) {
+                writer.println("Recibo ID: " + r.getId());
+                writer.println("Data: " + r.getDataEmissao());
+                writer.println("Quiosque: " + r.getTicket().getIdQuiosque());
+                writer.println("Detalhes:");
+                for (Map.Entry<String, Double> entry : r.getValores().entrySet()) {
+                    writer.printf(" - %s: %.2f €%n", entry.getKey(), entry.getValue());
+                }
+                writer.printf("IVA: %.2f €%n", r.getIva());
+                writer.printf("Total com IVA: %.2f €%n", r.getTotal());
+                writer.println("--------------------------------------");
             }
-            writer.printf("IVA: %.2f €%n", r.getIva());
-            writer.printf("Total com IVA: %.2f €%n", r.getTotal());
-            writer.println("--------------------------------------");
+            writer.println("Total de recibos emitidos: " + recibos.size());
+            System.out.println("Relatório gerado com sucesso: " + relatorio.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println("Erro ao escrever o relatório: " + e.getMessage());
         }
-        writer.println("Total de recibos emitidos: " + recibos.size());
-        System.out.println("Relatório gerado com sucesso: " + relatorio.getAbsolutePath());
-    } catch (IOException e) {
-        System.out.println("Erro ao escrever o relatório: " + e.getMessage());
     }
-}
     // --------------------------Tabela de Preços--------------------------//
 
     /**
