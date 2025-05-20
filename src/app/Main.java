@@ -717,111 +717,133 @@ public class Main {
     }
 
     // --------------------------Agendamentos--------------------------//
-    private static void criarAgendamentoReal() {
-        if (utilizadores.size() < 2) {
-            System.out.println("É necessário pelo menos dois utilizadores (cliente e parceiro).");
-            return;
+
+/**
+ * Lê uma data com formato AAAA-MM-DD e valida que
+ * a data mínima (dataMinima) não seja ultrapassada.
+ * Pede repetidamente até o utilizador inserir uma data válida.
+ */
+private static LocalDate lerDataComValidacao(String mensagem, LocalDate dataMinima) {
+    LocalDate data = null;
+    while (data == null) {
+        System.out.print(mensagem);
+        String entrada = scanner.nextLine();
+        try {
+            LocalDate temp = LocalDate.parse(entrada);
+            if (dataMinima != null && temp.isBefore(dataMinima)) {
+                System.out.println("Data inválida: não pode ser anterior a " + dataMinima);
+                continue;
+            }
+            data = temp;
+        } catch (java.time.format.DateTimeParseException e) {
+            System.out.println("Data inválida. Use o formato AAAA-MM-DD, ex: 2025-05-01");
         }
+    }
+    return data;
+}
 
-        System.out.println("Tipo de quiosque para agendar:");
-        System.out.println("[1] Khikhipa");
-        System.out.println("[2] Khikhita");
-        System.out.println("[3] Khikhivi");
-        System.out.print("Escolha: ");
-        String tipo = scanner.nextLine();
+private static void criarAgendamentoReal() {
+    if (utilizadores.size() < 2) {
+        System.out.println("É necessário pelo menos dois utilizadores (cliente e parceiro).");
+        return;
+    }
 
-        System.out.println("Escolher utilizador A (cliente):");
-        Utilizador a = escolherUtilizador();
-        System.out.println("Escolher utilizador B (prestador):");
-        Utilizador b = escolherUtilizador();
+    System.out.println("Tipo de quiosque para agendar:");
+    System.out.println("[1] Khikhipa");
+    System.out.println("[2] Khikhita");
+    System.out.println("[3] Khikhivi");
+    System.out.print("Escolha: ");
+    String tipo = scanner.nextLine();
 
-        String idQuiosque = "";
-        String idCompartimentoOuArea = "";
+    System.out.println("Escolher utilizador A (cliente):");
+    Utilizador a = escolherUtilizador();
+    System.out.println("Escolher utilizador B (prestador):");
+    Utilizador b = escolherUtilizador();
 
-        // Escolha e validação do tipo de quiosque
-        switch (tipo) {
-            case "1" -> {
-                if (khikhipas.isEmpty()) {
-                    System.out.println("Nenhum Khikhipa disponível.");
-                    return;
-                }
-                Khikhipa k = khikhipas.get(0);
-                Compartimento c = k.getCompartimentos().get(0);
-                idQuiosque = k.getId();
-                idCompartimentoOuArea = c.getId();
-            }
+    String idQuiosque = "";
+    String idCompartimentoOuArea = "";
 
-            case "2" -> {
-                if (khikhitas.isEmpty()) {
-                    System.out.println("Nenhum Khikhita disponível.");
-                    return;
-                }
-                Khikhita k = khikhitas.get(0);
-                String tipoCaixa = "S"; // neste exemplo fixo
-                if (!podeAdicionarCaixaKhikhita(k, tipoCaixa)) {
-                    System.out.println("Limite de caixas tipo " + tipoCaixa + " atingido para este Khikhita.");
-                    return;
-                }
-                idQuiosque = k.getId();
-                idCompartimentoOuArea = "N/A";
-            }
-
-            case "3" -> {
-                if (khikhivis.isEmpty()) {
-                    System.out.println("Nenhum Khikhivi disponível.");
-                    return;
-                }
-                Khikhivi k = khikhivis.get(0);
-                AreaTrabalho area = k.getAreasTrabalho().get(0); // exemplo: escolher primeira
-                if (!areaEstaOperacional(area)) {
-                    System.out.println("Área '" + area.getNome() + "' tem itens avariados. Agendamento impossível.");
-                    return;
-                }
-                idQuiosque = k.getId();
-                idCompartimentoOuArea = area.getNome();
-            }
-
-            default -> {
-                System.out.println("Tipo inválido.");
+    // Escolha e validação do tipo de quiosque
+    switch (tipo) {
+        case "1" -> {
+            if (khikhipas.isEmpty()) {
+                System.out.println("Nenhum Khikhipa disponível.");
                 return;
             }
+            Khikhipa k = khikhipas.get(0);
+            Compartimento c = k.getCompartimentos().get(0);
+            idQuiosque = k.getId();
+            idCompartimentoOuArea = c.getId();
         }
 
-        System.out.print("Data entrega 1 (AAAA-MM-DD): ");
-        LocalDate e1 = LocalDate.parse(scanner.nextLine());
-        System.out.print("Data levantamento 1 (AAAA-MM-DD): ");
-        LocalDate l1 = LocalDate.parse(scanner.nextLine());
-        System.out.print("Data entrega 2 (AAAA-MM-DD): ");
-        LocalDate e2 = LocalDate.parse(scanner.nextLine());
-        System.out.print("Data levantamento 2 (AAAA-MM-DD): ");
-        LocalDate l2 = LocalDate.parse(scanner.nextLine());
+        case "2" -> {
+            if (khikhitas.isEmpty()) {
+                System.out.println("Nenhum Khikhita disponível.");
+                return;
+            }
+            Khikhita k = khikhitas.get(0);
+            String tipoCaixa = "S"; // neste exemplo fixo
+            if (!podeAdicionarCaixaKhikhita(k, tipoCaixa)) {
+                System.out.println("Limite de caixas tipo " + tipoCaixa + " atingido para este Khikhita.");
+                return;
+            }
+            idQuiosque = k.getId();
+            idCompartimentoOuArea = "N/A";
+        }
 
-        TicketAgendamento t = new TicketAgendamento(
-                idQuiosque, idCompartimentoOuArea, a.getNif(), b.getNif(),
-                "S", e1, l1, e2, l2);
-        agendamentos.add(t);
-        System.out.println("Agendamento criado com sucesso.");
-    }
+        case "3" -> {
+            if (khikhivis.isEmpty()) {
+                System.out.println("Nenhum Khikhivi disponível.");
+                return;
+            }
+            Khikhivi k = khikhivis.get(0);
+            AreaTrabalho area = k.getAreasTrabalho().get(0); // exemplo: escolher primeira
+            if (!areaEstaOperacional(area)) {
+                System.out.println("Área '" + area.getNome() + "' tem itens avariados. Agendamento impossível.");
+                return;
+            }
+            idQuiosque = k.getId();
+            idCompartimentoOuArea = area.getNome();
+        }
 
-    private static void listarAgendamentos() {
-        if (agendamentos.isEmpty()) {
-            System.out.println("Nenhum agendamento encontrado.");
+        default -> {
+            System.out.println("Tipo inválido.");
             return;
         }
-
-        LocalDate hoje = Config.DATA_HOJE;
-        agendamentos.forEach(t -> {
-            String tipo;
-            if (t.getDataLevantamento2().isBefore(hoje))
-                tipo = "ANTERIOR";
-            else if (t.getDataLevantamento2().isEqual(hoje))
-                tipo = "HOJE";
-            else
-                tipo = "POSTERIOR";
-
-            System.out.println("[" + tipo + "] " + t.getIdQuiosque() + " - " + t.getDataLevantamento2());
-        });
     }
+
+    // Ler as datas com validação da ordem (entrega ≤ levantamento)
+    LocalDate e1 = lerDataComValidacao("Data entrega 1 (AAAA-MM-DD): ", null);
+    LocalDate l1 = lerDataComValidacao("Data levantamento 1 (AAAA-MM-DD): ", e1);
+    LocalDate e2 = lerDataComValidacao("Data entrega 2 (AAAA-MM-DD): ", null);
+    LocalDate l2 = lerDataComValidacao("Data levantamento 2 (AAAA-MM-DD): ", e2);
+
+    TicketAgendamento t = new TicketAgendamento(
+            idQuiosque, idCompartimentoOuArea, a.getNif(), b.getNif(),
+            "S", e1, l1, e2, l2);
+    agendamentos.add(t);
+    System.out.println("Agendamento criado com sucesso.");
+}
+
+private static void listarAgendamentos() {
+    if (agendamentos.isEmpty()) {
+        System.out.println("Nenhum agendamento encontrado.");
+        return;
+    }
+
+    LocalDate hoje = Config.DATA_HOJE;
+    agendamentos.forEach(t -> {
+        String tipo;
+        if (t.getDataLevantamento2().isBefore(hoje))
+            tipo = "ANTERIOR";
+        else if (t.getDataLevantamento2().isEqual(hoje))
+            tipo = "HOJE";
+        else
+            tipo = "POSTERIOR";
+
+        System.out.println("[" + tipo + "] " + t.getIdQuiosque() + " - " + t.getDataLevantamento2());
+    });
+}
 
     // --------------------------Recibos--------------------------//
 
