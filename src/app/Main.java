@@ -57,13 +57,13 @@ public class Main {
             switch (opcao) {
                 case "1" -> menuUtilizadores();
                 case "2" -> menuKhikhipa();
-                case "3" -> criarAgendamentoReal();
-                case "4" -> listarAgendamentos();
-                case "5" -> emitirReciboReal();
-                case "6" -> listarRecibos();
-                case "7" -> guardarDados();
-                case "8" -> menuKhikhita();
-                case "9" -> menuKhikhivi();
+                case "3" -> menuKhikhita();
+                case "4" -> menuKhikhivi();
+                case "5" -> criarAgendamentoReal();
+                case "6" -> listarAgendamentos();
+                case "7" -> emitirReciboReal();
+                case "8" -> listarRecibos();
+                case "9" -> guardarDados();
                 case "10" -> mostrarTabelaPrecos();
                 case "11" -> gerarRelatorioRecibos();
                 case "12" -> gerarRelatorioAgendamentos();
