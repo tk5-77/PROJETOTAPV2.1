@@ -49,6 +49,7 @@ public class Main {
             System.out.println("[9] Gestão de Quiosques Khikhivi");
             System.out.println("[10] Tabela de Preços");
             System.out.println("[11] Gerar Relatório de Recibos");
+            System.out.println("[12] Gerar relatório de agendamentos (.txt)");
             System.out.println("[0] Sair");
             System.out.print("Opção: ");
             String opcao = scanner.nextLine();
@@ -65,6 +66,7 @@ public class Main {
                 case "9" -> menuKhikhivi();
                 case "10" -> mostrarTabelaPrecos();
                 case "11" -> gerarRelatorioRecibos();
+                case "12" -> gerarRelatorioAgendamentos();
                 case "0" -> sair = true;
                 default -> System.out.println("Opção inválida.");
             }
@@ -86,6 +88,12 @@ public class Main {
         return null;
     }
 
+    // --------------------------Utilizadores--------------------------//
+    /**
+     * Menu de gestão de utilizadores.
+     * Permite listar, adicionar, editar e remover utilizadores.
+     */
+
     private static void menuUtilizadores() {
         boolean voltar = false;
         while (!voltar) {
@@ -94,6 +102,7 @@ public class Main {
             System.out.println("[2] Adicionar utilizador");
             System.out.println("[3] Editar utilizador");
             System.out.println("[4] Remover utilizador");
+            System.out.println("[5] Listar caixas do utilizador");
             System.out.println("[0] Voltar");
             System.out.print("Opção: ");
             String op = scanner.nextLine();
@@ -102,6 +111,7 @@ public class Main {
                 case "2" -> adicionarUtilizador();
                 case "3" -> editarUtilizador();
                 case "4" -> removerUtilizador();
+                case "5" -> listarCaixasDoUtilizador();
                 case "0" -> voltar = true;
                 default -> System.out.println("Opção inválida.");
             }
@@ -192,6 +202,32 @@ public class Main {
         System.out.println("Utilizador removido.");
     }
 
+    /**
+ * Lista todas as caixas associadas a um utilizador escolhido.
+ */
+private static void listarCaixasDoUtilizador() {
+    if (utilizadores.isEmpty()) {
+        System.out.println("Nenhum utilizador disponível.");
+        return;
+    }
+
+    Utilizador u = escolherUtilizador();
+
+    List<Caixa> caixas = u.getCaixas();
+    if (caixas.isEmpty()) {
+        System.out.println("Este utilizador não tem caixas.");
+        return;
+    }
+
+    System.out.println("Caixas do utilizador " + u.getNome() + ":");
+    for (Caixa c : caixas) {
+        System.out.println("- ID: " + c.getId() +
+                           ", Tipo: " + c.getTipo().getId() +
+                           ", Ativa: " + (c.isAtiva() ? "Sim" : "Não"));
+    }
+}
+
+
     // --------------------------Khikhivi--------------------------//
     private static void menuKhikhipa() {
         boolean voltar = false;
@@ -279,27 +315,39 @@ public class Main {
         }
     }
 
-    private static void adicionarKhikhivi() {
-        Morada morada = new Morada("Rua Oficina", 12, "3500052", "Viseu");
-        Responsavel man = new Responsavel("Vítor", "911000000");
-        Responsavel hig = new Responsavel("Rita", "914000000");
+  private static void adicionarKhikhivi() {
+    Morada morada = new Morada("Rua Oficina", 12, "3500052", "Viseu");
+    Responsavel man = new Responsavel("Vítor", "911000000");
+    Responsavel hig = new Responsavel("Rita", "914000000");
 
-        List<Item> auto = Arrays.asList(
-                new Item("Elevador Auto", true),
-                new Item("Ferramentas Auto", false));
-        List<Item> carpintaria = Arrays.asList(
-                new Item("Mesa Carpintaria", false),
-                new Item("Ferramentas Madeira", true));
+    // Criar as 4 áreas fixas com alguns itens operacionais e outros avariados
+    List<AreaTrabalho> areas = new ArrayList<>();
 
-        AreaTrabalho areaAuto = new AreaTrabalho("auto", auto);
-        AreaTrabalho areaCarp = new AreaTrabalho("carpintaria", carpintaria);
+    areas.add(new AreaTrabalho("auto", Arrays.asList(
+        new Item("Elevador Auto", true),
+        new Item("Ferramentas Auto", false)
+    )));
 
-        Khikhivi novo = new Khikhivi("KHIVI001", "Pavilhão Reparo", morada,
-                Arrays.asList(areaAuto, areaCarp), man, hig);
+    areas.add(new AreaTrabalho("carpintaria", Arrays.asList(
+        new Item("Mesa Carpintaria", true),
+        new Item("Serra Circular", true)
+    )));
 
-        khikhivis.add(novo);
-        System.out.println("Khikhivi com áreas adicionado.");
-    }
+    areas.add(new AreaTrabalho("moto", Arrays.asList(
+        new Item("Bancada Moto", false),
+        new Item("Compressor", true)
+    )));
+
+    areas.add(new AreaTrabalho("eletrodoméstico", Arrays.asList(
+        new Item("Multímetro", true),
+        new Item("Chave Isolada", true)
+    )));
+
+    Khikhivi novo = new Khikhivi("KHIVI" + (khikhivis.size() + 1), "Khikhivi Oficinas", morada, areas, man, hig);
+    khikhivis.add(novo);
+    System.out.println("Khikhivi com 4 áreas adicionado.");
+}
+
 
     private static void verificarAreas() {
         if (khikhivis.isEmpty()) {
@@ -550,6 +598,33 @@ public class Main {
     }
 
     /**
+     * Gera um recibo com base no agendamento selecionado.
+     * O recibo inclui os detalhes do agendamento e os valores associados.
+     */
+    private static void gerarRelatorioAgendamentos() {
+    File relatorio = new File("relatorio_agendamentos.txt");
+    try (PrintWriter writer = new PrintWriter(relatorio)) {
+        writer.println("===== RELATÓRIO DE AGENDAMENTOS =====");
+        for (TicketAgendamento t : agendamentos) {
+            writer.println("Quiosque: " + t.getIdQuiosque());
+            writer.println("Compartimento/Área: " + t.getIdCompartimentoOuArea());
+            writer.println("Cliente: " + t.getIdSolicitante());
+            writer.println("Prestador: " + t.getIdPrestador());
+            writer.println("Tipo de Caixa: " + t.getTipoCaixa());
+            writer.println("Entrega 1: " + t.getDataEntrega1());
+            writer.println("Levantamento 1: " + t.getDataLevantamento1());
+            writer.println("Entrega 2: " + t.getDataEntrega2());
+            writer.println("Levantamento 2: " + t.getDataLevantamento2());
+            writer.println("--------------------------------------");
+        }
+        writer.println("Total de agendamentos: " + agendamentos.size());
+        System.out.println("Relatório de agendamentos gerado com sucesso: " + relatorio.getAbsolutePath());
+    } catch (IOException e) {
+        System.out.println("Erro ao escrever o relatório de agendamentos: " + e.getMessage());
+    }
+}
+
+    /**
      * Lista todos os recibos emitidos no sistema, com os detalhes
      * de cada valor incluído e o total com IVA.
      */
@@ -602,7 +677,7 @@ private static void gerarRelatorioRecibos() {
     } catch (IOException e) {
         System.out.println("Erro ao escrever o relatório: " + e.getMessage());
     }
-}   
+}
     // --------------------------Tabela de Preços--------------------------//
 
     /**
