@@ -458,14 +458,16 @@ public class Main {
     }
 
     private static void listarKhikhipas() {
-        if (khikhipas.isEmpty()) {
-            System.out.println("Nenhum Khikhipa disponível.");
-            return;
-        }
-        for (Khikhipa k : khikhipas) {
-            System.out.println("- " + k.getNome() + " | Compartimentos: " + k.getCompartimentos().size());
-        }
+    if (khikhipas.isEmpty()) {
+        System.out.println("Nenhum Khikhipa disponível.");
+        return;
     }
+    for (Khikhipa k : khikhipas) {
+        System.out.println("- " + k.getNome() + " | Compartimentos: " + k.getCompartimentos().size());
+        System.out.println("  Horário: " + k.horarioFuncionamento());
+    }
+}
+
 
     /**
      * Adiciona um quiosque Khikhipa com dados reais inseridos pelo utilizador.
