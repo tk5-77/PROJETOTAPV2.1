@@ -759,7 +759,7 @@ private static void criarAgendamentoReal() {
 
     System.out.println("Escolher utilizador A (cliente):");
     Utilizador a = escolherUtilizador();
-    System.out.println("Escolher utilizador B (prestador):");
+    System.out.println("Escolher utilizador B (parceiro):");
     Utilizador b = escolherUtilizador();
 
     String idQuiosque = "";
@@ -892,6 +892,8 @@ private static void listarAgendamentos() {
         System.out.println("Recibo emitido com total: " + total + " EUR");
     }
 
+    
+
     /**
      * Gera um recibo com base no agendamento selecionado.
      * O recibo inclui os detalhes do agendamento e os valores associados.
@@ -1000,12 +1002,12 @@ private static void listarAgendamentos() {
         System.out.println("========================================");
     }
 
-    // --------------------------Métodos auxiliares--------------------------//
+    // --------------------------Métodos de guardar Dados--------------------------//
 
     private static Utilizador escolherUtilizador() {
         for (int i = 0; i < utilizadores.size(); i++) {
             System.out.println("[" + i + "] " + utilizadores.get(i).getNome());
-        }
+        }   
         System.out.print("Escolha: ");
         int idx = Integer.parseInt(scanner.nextLine());
         return utilizadores.get(idx);

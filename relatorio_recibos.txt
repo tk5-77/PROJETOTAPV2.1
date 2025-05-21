@@ -1,0 +1,10 @@
+===== RELATÓRIO DE RECIBOS EMITIDOS =====
+Recibo ID: R1
+Data: 2025-04-24
+Quiosque: 2
+Detalhes:
+ - Serviço base: 20.00 €
+IVA: 4.60 €
+Total com IVA: 24.60 €
+--------------------------------------
+Total de recibos emitidos: 1
