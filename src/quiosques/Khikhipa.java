@@ -7,6 +7,8 @@ import suporte.Responsavel;
 import utilizadores.Morada;
 
 public class Khikhipa implements Serializable {
+    private String codigoPostal;
+    private int capacidade;
     private String id;
     private String nome;
     private Morada morada;
@@ -18,13 +20,30 @@ public class Khikhipa implements Serializable {
     private final LocalTime abertura = LocalTime.of(6, 0);
     private final LocalTime encerramento = LocalTime.of(23, 0);
 
-    public Khikhipa(String id, String nome, Morada morada, List<Compartimento> compartimentos, Responsavel manutencao, Responsavel higiene) {
-        this.id = id;
+    // ✅ CONSTRUTOR AJUSTADO
+    public Khikhipa(String nome, Morada morada, List<Compartimento> compartimentos,
+                    Responsavel manutencao, Responsavel higiene,
+                    String codigoPostal, int capacidade) {
+
+        this.codigoPostal = codigoPostal;
+        this.capacidade = capacidade;
+        this.id = gerarID(); // ✅ ID gerado automaticamente
+
         this.nome = nome;
         this.morada = morada;
         this.compartimentos = compartimentos;
         this.manutencao = manutencao;
         this.higiene = higiene;
+    }
+
+    public Khikhipa(String id2, String nome2, Morada morada2, List<Compartimento> compartimentos2,
+            Responsavel manutencao2, Responsavel higiene2) {
+        //TODO Auto-generated constructor stub
+    }
+
+    // ✅ Geração automática do ID
+    private String gerarID() {
+        return codigoPostal + String.format("%02d", capacidade);
     }
 
     public String getId() { return id; }

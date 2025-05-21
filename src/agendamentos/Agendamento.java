@@ -13,6 +13,11 @@ public class Agendamento implements Serializable {
         this.concluido = concluido;
     }
 
+    public Agendamento(String string, String id, String nome, String idA, String idB, String tipoCaixa,
+            LocalDate data) {
+        //TODO Auto-generated constructor stub
+    }
+
     public TicketAgendamento getTicket() { return ticket; }
     public void setTicket(TicketAgendamento ticket) { this.ticket = ticket; }
 
