@@ -1,12 +1,2 @@
 ===== RELATÓRIO DE AGENDAMENTOS =====
-Quiosque: 2
-Compartimento/Área: 12
-Cliente: 123456789
-Prestador: 987654321
-Tipo de Caixa: S
-Entrega 1: 2025-05-21
-Levantamento 1: 2025-05-22
-Entrega 2: 2025-09-10
-Levantamento 2: 2025-10-10
---------------------------------------
-Total de agendamentos: 1
+Total de agendamentos: 0

@@ -13,8 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.ArrayList;
 
 
 public class Main {
@@ -277,7 +275,7 @@ public class Main {
             return;
         }
 
-        Utilizador u = escolherUtilizador();
+        Utilizador u = escolherUtilizador(null);
         System.out.print("Novo nome (atual: " + u.getNome() + "): ");
         String nome = scanner.nextLine();
         if (!nome.isBlank())
@@ -302,7 +300,7 @@ public class Main {
             return;
         }
 
-        Utilizador u = escolherUtilizador();
+        Utilizador u = escolherUtilizador(null);
         utilizadores.remove(u);
         System.out.println("Utilizador removido.");
     }
@@ -316,7 +314,7 @@ public class Main {
             return;
         }
 
-        Utilizador u = escolherUtilizador();
+        Utilizador u = escolherUtilizador(null);
 
         List<Caixa> caixas = u.getCaixas();
         if (caixas.isEmpty()) {
@@ -342,10 +340,10 @@ public class Main {
         }
 
         System.out.println("Escolha o utilizador principal:");
-        Utilizador u1 = escolherUtilizador();
+        Utilizador u1 = escolherUtilizador(null);
 
         System.out.println("Escolha o utilizador a adicionar como cliente/parceiro:");
-        Utilizador u2 = escolherUtilizador();
+        Utilizador u2 = escolherUtilizador(null);
 
         if (u1 == u2) {
             System.out.println("Não pode adicionar o mesmo utilizador a si próprio.");
@@ -387,7 +385,7 @@ public class Main {
             return;
         }
 
-        Utilizador u = escolherUtilizador();
+        Utilizador u = escolherUtilizador(null);
 
         System.out.println("Clientes de " + u.getNome() + ":");
         if (u.getClientes().isEmpty()) {
@@ -922,7 +920,7 @@ private static void agendarCaixaKhikhita() {
     );
 
     Agendamento ag = new Agendamento(ticket, entrega1, false); // Data principal = entrega1
-    //agendamentos.add(ag);
+    agendamentos.add(ticket);
     k.registarEntradaCaixa(tipo);
 
     System.out.println("✅ Agendamento criado com sucesso.");
@@ -1117,9 +1115,9 @@ private static void editarKhikhita() {
         String tipo = scanner.nextLine();
 
         System.out.println("Escolher utilizador A (cliente):");
-        Utilizador a = escolherUtilizador();
+        Utilizador a = escolherUtilizador(tipo);
         System.out.println("Escolher utilizador B (parceiro):");
-        Utilizador b = escolherUtilizador();
+        Utilizador b = escolherUtilizador(tipo  );
 
         String idQuiosque = "";
         String idCompartimentoOuArea = "";
@@ -1362,14 +1360,34 @@ private static void editarKhikhita() {
     // --------------------------Métodos de guardar
     // Dados--------------------------//
 
-    private static Utilizador escolherUtilizador() {
-        for (int i = 0; i < utilizadores.size(); i++) {
-            System.out.println("[" + i + "] " + utilizadores.get(i).getNome());
-        }
-        System.out.print("Escolha: ");
-        int idx = Integer.parseInt(scanner.nextLine());
-        return utilizadores.get(idx);
+   private static Utilizador escolherUtilizador(String titulo) {
+    if (utilizadores.isEmpty()) {
+        System.out.println("Nenhum utilizador disponível.");
+        return null;
     }
+
+    System.out.println("Escolher " + titulo + ":");
+    for (int i = 0; i < utilizadores.size(); i++) {
+        System.out.println("[" + i + "] " + utilizadores.get(i).getNome());
+    }
+
+    System.out.print("Escolha: ");
+    try {
+        int index = Integer.parseInt(scanner.nextLine());
+
+        if (index < 0 || index >= utilizadores.size()) {
+            System.out.println("❌ Índice inválido.");
+            return null;
+        }
+
+        return utilizadores.get(index);
+
+    } catch (NumberFormatException e) {
+        System.out.println("❌ Entrada inválida.");
+        return null;
+    }
+}
+
 
     private static void guardarDados() {
         try (
