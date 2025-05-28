@@ -53,6 +53,7 @@ public class Main {
             System.out.println("[10] Tabela de Preços");
             System.out.println("[11] Gerar Relatório de Recibos");
             System.out.println("[12] Gerar relatório de agendamentos (.txt)");
+            System.out.println("[13] Emitir recibos obrigatórios.");
             System.out.println("[0] Sair");
             System.out.print("Opção: ");
             String opcao = scanner.nextLine();
@@ -70,6 +71,7 @@ public class Main {
                 case "10" -> mostrarTabelaPrecos();
                 case "11" -> gerarRelatorioRecibos();
                 case "12" -> gerarRelatorioAgendamentos();
+                case "13" -> emitirRecibosObrigatorios();
                 case "0" -> sair = true;
                 default -> System.out.println("Opção inválida.");
             }
@@ -1444,6 +1446,41 @@ public class Main {
             System.out.println("Erro ao escrever o relatório: " + e.getMessage());
         }
     }
+
+    private static void emitirRecibosObrigatorios() {
+        if (agendamentos.size() < 4) {
+            System.out.println("Não há agendamentos suficientes para gerar os 4 recibos obrigatórios.");
+            return;
+        }
+
+        for (int i = 0; i < 4; i++) {
+            TicketAgendamento t = agendamentos.get(i);
+            Map<String, Double> valores = new HashMap<>();
+
+            // Serviço base (obrigatório)
+            valores.put("Serviço base", 20.0);
+
+            // Custo específico por tipo de quiosque (com base no ID)
+            if (t.getIdQuiosque().startsWith("350")) { // Khikhipa
+                valores.put("Uso compartimento", 2.4);
+            } else if (t.getIdQuiosque().startsWith("KHITA")) { // Khikhita
+                valores.put("Comissão tabacaria", 5.0);
+            } else if (t.getIdQuiosque().startsWith("KHIVI")) { // Khikhivi
+                valores.put("Uso da área de trabalho", 7.5);
+            }
+
+            double subtotal = valores.values().stream().mapToDouble(Double::doubleValue).sum();
+            double iva = subtotal * 0.23;
+            double total = subtotal + iva;
+
+            Recibo r = new Recibo("R" + (recibos.size() + 1), Config.DATA_HOJE, t, valores, iva, total);
+            recibos.add(r);
+            guardarReciboEmTxt(r);
+            System.out.println("Recibo R" + (recibos.size()) + " criado para agendamento " + i + ". Total: "
+                    + String.format("%.2f", total) + " EUR");
+        }
+    }
+
     // --------------------------Tabela de Preços--------------------------//
 
     /**
