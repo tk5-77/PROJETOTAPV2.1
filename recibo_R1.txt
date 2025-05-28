@@ -1,0 +1,10 @@
+===== RECIBO EMITIDO =====
+ID: R1
+Data de Emissão: 2025-04-24
+Quiosque: 123456701
+Utilizador A (cliente): 234567890
+Utilizador B (prestador): 525252552
+Detalhes:
+ - Serviço base: 20.00 €
+IVA (23%): 4.60 €
+Total: 24.60 €

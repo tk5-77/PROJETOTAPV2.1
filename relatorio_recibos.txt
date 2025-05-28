@@ -1,7 +1,7 @@
 ===== RELATÓRIO DE RECIBOS EMITIDOS =====
 Recibo ID: R1
 Data: 2025-04-24
-Quiosque: 2
+Quiosque: 123456701
 Detalhes:
  - Serviço base: 20.00 €
 IVA: 4.60 €

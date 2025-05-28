@@ -1,2 +1,12 @@
 ===== RELATÓRIO DE AGENDAMENTOS =====
-Total de agendamentos: 0
+Quiosque: 123456701
+Compartimento/Área: 1234567010101
+Cliente: 234567890
+Prestador: 525252552
+Tipo de Caixa: S
+Entrega 1: 2025-04-23
+Levantamento 1: 2025-04-24
+Entrega 2: 2025-04-25
+Levantamento 2: 2025-04-26
+--------------------------------------
+Total de agendamentos: 1

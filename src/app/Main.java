@@ -14,7 +14,6 @@ import java.time.LocalTime;
 import java.util.*;
 import java.lang.reflect.Field;
 
-
 public class Main {
     static List<Utilizador> utilizadores = new ArrayList<>();
     static List<Khikhipa> khikhipas = new ArrayList<>();
@@ -22,7 +21,7 @@ public class Main {
     static List<Khikhivi> khikhivis = new ArrayList<>();
     static List<TicketAgendamento> agendamentos = new ArrayList<>();
     static List<Recibo> recibos = new ArrayList<>();
-    
+
     static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -745,21 +744,16 @@ public class Main {
         Responsavel man = new Responsavel("Vítor", "911000000");
         Responsavel hig = new Responsavel("Rita", "914000000");
 
-        // Criar as 4 áreas fixas com alguns itens operacionais e outros avariados
         List<AreaTrabalho> areas = new ArrayList<>();
-
         areas.add(new AreaTrabalho("auto", Arrays.asList(
                 new Item("Elevador Auto", true),
                 new Item("Ferramentas Auto", false))));
-
         areas.add(new AreaTrabalho("carpintaria", Arrays.asList(
                 new Item("Mesa Carpintaria", true),
                 new Item("Serra Circular", true))));
-
         areas.add(new AreaTrabalho("moto", Arrays.asList(
                 new Item("Bancada Moto", false),
                 new Item("Compressor", true))));
-
         areas.add(new AreaTrabalho("eletrodoméstico", Arrays.asList(
                 new Item("Multímetro", true),
                 new Item("Chave Isolada", true))));
@@ -790,6 +784,127 @@ public class Main {
             }
         }
         return true;
+    }
+
+    private static void agendarKhikhivi(Utilizador a, Utilizador b) {
+        if (khikhivis.isEmpty()) {
+            System.out.println("Nenhum Khikhivi disponível.");
+            return;
+        }
+
+        System.out.println("Escolha o Khikhivi:");
+        for (int i = 0; i < khikhivis.size(); i++) {
+            System.out.println("[" + i + "] " + khikhivis.get(i).getNome());
+        }
+        System.out.print("Opção: ");
+        int idxKhikhivi;
+        try {
+            idxKhikhivi = Integer.parseInt(scanner.nextLine().trim());
+            if (idxKhikhivi < 0 || idxKhikhivi >= khikhivis.size()) {
+                System.out.println("Índice inválido.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Erro: introduz um número válido.");
+            return;
+        }
+
+        Khikhivi k = khikhivis.get(idxKhikhivi);
+        List<AreaTrabalho> areas = k.getAreasTrabalho();
+        if (areas.isEmpty()) {
+            System.out.println("Este Khikhivi não tem áreas de trabalho.");
+            return;
+        }
+
+        System.out.println("Escolha a área de trabalho:");
+        for (int i = 0; i < areas.size(); i++) {
+            System.out.println("[" + i + "] " + areas.get(i).getNome());
+        }
+        System.out.print("Opção: ");
+        int idxArea;
+        try {
+            idxArea = Integer.parseInt(scanner.nextLine().trim());
+            if (idxArea < 0 || idxArea >= areas.size()) {
+                System.out.println("Índice inválido.");
+                return;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Erro: introduz um número válido.");
+            return;
+        }
+
+        AreaTrabalho area = areas.get(idxArea);
+
+        if (!areaEstaOperacional(area)) {
+            System.out.println("A área '" + area.getNome() + "' contém itens avariados. Não é possível agendar.");
+            return;
+        }
+
+        LocalDate dataAgendamento = lerDataComValidacao("Data para o agendamento da área", Config.DATA_HOJE);
+
+        TicketAgendamento ticket = new TicketAgendamento(
+                k.getId(),
+                area.getNome(),
+                a.getNif(),
+                b.getNif(),
+                area.getNome(),
+                dataAgendamento,
+                dataAgendamento,
+                dataAgendamento,
+                dataAgendamento);
+
+        agendamentos.add(ticket);
+        System.out.println("Agendamento em Khikhivi criado com sucesso para: " + area.getNome());
+    }
+
+    private static void agendarKhikhipa(Utilizador a, Utilizador b) {
+        if (khikhipas.isEmpty()) {
+            System.out.println("Nenhum Khikhipa disponível.");
+            return;
+        }
+        Khikhipa k = khikhipas.get(0);
+        Compartimento c = k.getCompartimentos().get(0);
+
+        TicketAgendamento ticket = new TicketAgendamento(
+                k.getId(),
+                c.getId(),
+                a.getNif(),
+                b.getNif(),
+                "S",
+                Config.DATA_HOJE.minusDays(1),
+                Config.DATA_HOJE,
+                Config.DATA_HOJE.plusDays(1),
+                Config.DATA_HOJE.plusDays(2));
+
+        agendamentos.add(ticket);
+        System.out.println("Agendamento em Khikhipa criado com sucesso!");
+    }
+
+    private static void agendarKhikhita(Utilizador a, Utilizador b) {
+        if (khikhitas.isEmpty()) {
+            System.out.println("Nenhum Khikhita disponível.");
+            return;
+        }
+        Khikhita k = khikhitas.get(0);
+        String tipoCaixa = "S";
+        if (!podeAdicionarCaixaKhikhita(k, tipoCaixa)) {
+            System.out.println("Limite de caixas tipo " + tipoCaixa + " atingido para este Khikhita.");
+            return;
+        }
+
+        TicketAgendamento ticket = new TicketAgendamento(
+                k.getId(),
+                "N/A",
+                a.getNif(),
+                b.getNif(),
+                tipoCaixa,
+                Config.DATA_HOJE.minusDays(1),
+                Config.DATA_HOJE,
+                Config.DATA_HOJE.plusDays(1),
+                Config.DATA_HOJE.plusDays(2));
+
+        agendamentos.add(ticket);
+        System.out.println("Agendamento em Khikhita criado com sucesso!");
     }
 
     // --------------------------------------------------------------//
@@ -823,177 +938,176 @@ public class Main {
         }
     }
 
-   private static void listarKhikhitas() {
-    if (khikhitas.isEmpty()) {
-        System.out.println("Nenhum Khikhita disponível.");
-        return;
-    }
-
-    System.out.println("\n=== Lista de Quiosques Khikhita ===");
-
-    for (Khikhita k : khikhitas) {
-        System.out.println("\n------------------------------");
-        System.out.println("Nome da tabacaria: " + k.getNome());
-        System.out.println("ID: " + k.getId());
-        System.out.println("Morada: " + k.getMorada().toString());
-
-        Funcionario f = k.getFuncionario();
-        System.out.println("Funcionário: " + f.getNome() + " | Contacto: " + f.getContacto());
-
-        System.out.printf("Horário de funcionamento: %s às %s%n",
-                k.getAbertura(), k.getEncerramento());
-
-        System.out.println("Capacidade por tipo de caixa:");
-        for (Map.Entry<String, Integer> entry : k.getMaximoPorTipo().entrySet()) {
-            String tipo = entry.getKey();
-            int maximo = entry.getValue();
-            int atual = k.getAtuaisPorTipo().getOrDefault(tipo, 0);
-            System.out.printf("  Tipo %s → %d / %d usadas%n", tipo, atual, maximo);
+    private static void listarKhikhitas() {
+        if (khikhitas.isEmpty()) {
+            System.out.println("Nenhum Khikhita disponível.");
+            return;
         }
-    }
-}
 
-private static void agendarCaixaKhikhita() {
-    if (khikhitas.isEmpty()) {
-        System.out.println("Nenhum Khikhita disponível.");
-        return;
-    }
+        System.out.println("\n=== Lista de Quiosques Khikhita ===");
 
-    System.out.println("\n=== Agendamento em Khikhita ===");
-    for (int i = 0; i < khikhitas.size(); i++) {
-        Khikhita k = khikhitas.get(i);
-        System.out.printf("[%d] %s (ID: %s)%n", i, k.getNome(), k.getId());
-    }
+        for (Khikhita k : khikhitas) {
+            System.out.println("\n------------------------------");
+            System.out.println("Nome da tabacaria: " + k.getNome());
+            System.out.println("ID: " + k.getId());
+            System.out.println("Morada: " + k.getMorada().toString());
 
-    System.out.print("Escolha o índice do Khikhita: ");
-    int index = Integer.parseInt(scanner.nextLine());
-    if (index < 0 || index >= khikhitas.size()) {
-        System.out.println("Índice inválido.");
-        return;
-    }
+            Funcionario f = k.getFuncionario();
+            System.out.println("Funcionário: " + f.getNome() + " | Contacto: " + f.getContacto());
 
-    Khikhita k = khikhitas.get(index);
+            System.out.printf("Horário de funcionamento: %s às %s%n",
+                    k.getAbertura(), k.getEncerramento());
 
-    // Verifica horário
-    LocalTime agora = LocalTime.of(9, 0); // Data fixa para testes, como pedido no enunciado
-    if (!k.isAberto(agora)) {
-        System.out.println("Este quiosque está encerrado neste horário.");
-        return;
-    }
-
-    System.out.println("Tipos de caixa: S, M, L, XL");
-    System.out.print("Tipo de caixa: ");
-    String tipo = scanner.nextLine().toUpperCase();
-
-    if (!k.getMaximoPorTipo().containsKey(tipo)) {
-        System.out.println("Tipo inválido.");
-        return;
-    }
-
-    if (!k.podeReceberCaixa(tipo)) {
-        System.out.println("Capacidade esgotada para este tipo de caixa.");
-        return;
-    }
-
-    System.out.print("ID do utilizador A (solicitante): ");
-    String idA = scanner.nextLine();
-
-    System.out.print("ID do utilizador B (prestador): ");
-    String idB = scanner.nextLine();
-
-    System.out.println("=== Inserir datas do agendamento ===");
-    System.out.print("Data de entrega 1 (cliente -> quiosque): ");
-    LocalDate entrega1 = LocalDate.parse(scanner.nextLine());
-
-    System.out.print("Data de levantamento 1 (prestador vai buscar): ");
-    LocalDate levantamento1 = LocalDate.parse(scanner.nextLine());
-
-    System.out.print("Data de entrega 2 (prestador devolve): ");
-    LocalDate entrega2 = LocalDate.parse(scanner.nextLine());
-
-    System.out.print("Data de levantamento 2 (cliente final vai buscar): ");
-    LocalDate levantamento2 = LocalDate.parse(scanner.nextLine());
-
-    TicketAgendamento ticket = new TicketAgendamento(
-        k.getId(), "-", idA, idB, tipo,
-        entrega1, levantamento1, entrega2, levantamento2
-    );
-
-    Agendamento ag = new Agendamento(ticket, entrega1, false); // Data principal = entrega1
-    agendamentos.add(ticket);
-    k.registarEntradaCaixa(tipo);
-
-    System.out.println("✅ Agendamento criado com sucesso.");
-    System.out.println("💰 Custo base + 1.50€ pela operação do funcionário da tabacaria.");
-}
-
-
-private static void editarKhikhita() {
-    if (khikhitas.isEmpty()) {
-        System.out.println("Nenhum Khikhita disponível.");
-        return;
-    }
-
-    System.out.println("\n=== Editar Khikhita ===");
-    for (int i = 0; i < khikhitas.size(); i++) {
-        System.out.printf("[%d] %s (ID: %s)%n", i, khikhitas.get(i).getNome(), khikhitas.get(i).getId());
-    }
-
-    System.out.print("Escolha o índice do Khikhita: ");
-    int index = Integer.parseInt(scanner.nextLine());
-
-    if (index < 0 || index >= khikhitas.size()) {
-        System.out.println("Índice inválido.");
-        return;
-    }
-
-    Khikhita k = khikhitas.get(index);
-
-    System.out.print("Novo nome da tabacaria (Enter para manter): ");
-    String novoNome = scanner.nextLine();
-    if (!novoNome.isBlank()) setPrivateField(k, "nome", novoNome);
-
-    // Atualizar funcionário
-    System.out.print("Novo nome do funcionário (Enter para manter): ");
-    String nomeFunc = scanner.nextLine();
-    if (!nomeFunc.isBlank()) k.getFuncionario().setNome(nomeFunc);
-
-    System.out.print("Novo contacto do funcionário (Enter para manter): ");
-    String contactoFunc = scanner.nextLine();
-    if (!contactoFunc.isBlank()) k.getFuncionario().setContacto(contactoFunc);
-
-    // Atualizar horário
-    System.out.print("Nova hora de abertura (HH:mm, Enter para manter): ");
-    String horaAbertura = scanner.nextLine();
-    if (!horaAbertura.isBlank()) {
-        k.setAbertura(LocalTime.parse(horaAbertura));
-    }
-
-    System.out.print("Nova hora de encerramento (HH:mm, Enter para manter): ");
-    String horaFecho = scanner.nextLine();
-    if (!horaFecho.isBlank()) {
-        k.setEncerramento(LocalTime.parse(horaFecho));
-    }
-
-    // Atualizar limites por tipo
-    System.out.println("Deseja alterar limites por tipo de caixa? (s/n)");
-    if (scanner.nextLine().trim().equalsIgnoreCase("s")) {
-        Map<String, Integer> novosLimites = new HashMap<>();
-        for (String tipo : k.getMaximoPorTipo().keySet()) {
-            System.out.printf("Novo limite para tipo %s (Enter para manter %d): ", tipo, k.getMaximoPorTipo().get(tipo));
-            String input = scanner.nextLine();
-            if (input.isBlank()) {
-                novosLimites.put(tipo, k.getMaximoPorTipo().get(tipo));
-            } else {
-                novosLimites.put(tipo, Integer.parseInt(input));
+            System.out.println("Capacidade por tipo de caixa:");
+            for (Map.Entry<String, Integer> entry : k.getMaximoPorTipo().entrySet()) {
+                String tipo = entry.getKey();
+                int maximo = entry.getValue();
+                int atual = k.getAtuaisPorTipo().getOrDefault(tipo, 0);
+                System.out.printf("  Tipo %s → %d / %d usadas%n", tipo, atual, maximo);
             }
         }
-        k.setMaximoPorTipo(novosLimites);
     }
 
-    System.out.println("✅ Khikhita atualizado com sucesso.");
-}
+    private static void agendarCaixaKhikhita() {
+        if (khikhitas.isEmpty()) {
+            System.out.println("Nenhum Khikhita disponível.");
+            return;
+        }
 
+        System.out.println("\n=== Agendamento em Khikhita ===");
+        for (int i = 0; i < khikhitas.size(); i++) {
+            Khikhita k = khikhitas.get(i);
+            System.out.printf("[%d] %s (ID: %s)%n", i, k.getNome(), k.getId());
+        }
+
+        System.out.print("Escolha o índice do Khikhita: ");
+        int index = Integer.parseInt(scanner.nextLine());
+        if (index < 0 || index >= khikhitas.size()) {
+            System.out.println("Índice inválido.");
+            return;
+        }
+
+        Khikhita k = khikhitas.get(index);
+
+        // Verifica horário
+        LocalTime agora = LocalTime.of(9, 0); // Data fixa para testes, como pedido no enunciado
+        if (!k.isAberto(agora)) {
+            System.out.println("Este quiosque está encerrado neste horário.");
+            return;
+        }
+
+        System.out.println("Tipos de caixa: S, M, L, XL");
+        System.out.print("Tipo de caixa: ");
+        String tipo = scanner.nextLine().toUpperCase();
+
+        if (!k.getMaximoPorTipo().containsKey(tipo)) {
+            System.out.println("Tipo inválido.");
+            return;
+        }
+
+        if (!k.podeReceberCaixa(tipo)) {
+            System.out.println("Capacidade esgotada para este tipo de caixa.");
+            return;
+        }
+
+        System.out.print("ID do utilizador A (solicitante): ");
+        String idA = scanner.nextLine();
+
+        System.out.print("ID do utilizador B (prestador): ");
+        String idB = scanner.nextLine();
+
+        System.out.println("=== Inserir datas do agendamento ===");
+        System.out.print("Data de entrega 1 (cliente -> quiosque): ");
+        LocalDate entrega1 = LocalDate.parse(scanner.nextLine());
+
+        System.out.print("Data de levantamento 1 (prestador vai buscar): ");
+        LocalDate levantamento1 = LocalDate.parse(scanner.nextLine());
+
+        System.out.print("Data de entrega 2 (prestador devolve): ");
+        LocalDate entrega2 = LocalDate.parse(scanner.nextLine());
+
+        System.out.print("Data de levantamento 2 (cliente final vai buscar): ");
+        LocalDate levantamento2 = LocalDate.parse(scanner.nextLine());
+
+        TicketAgendamento ticket = new TicketAgendamento(
+                k.getId(), "-", idA, idB, tipo,
+                entrega1, levantamento1, entrega2, levantamento2);
+        agendamentos.add(ticket);
+        k.registarEntradaCaixa(tipo);
+
+        System.out.println("✅ Agendamento criado com sucesso.");
+        System.out.println("💰 Custo base + 1.50€ pela operação do funcionário da tabacaria.");
+    }
+
+    private static void editarKhikhita() {
+        if (khikhitas.isEmpty()) {
+            System.out.println("Nenhum Khikhita disponível.");
+            return;
+        }
+
+        System.out.println("\n=== Editar Khikhita ===");
+        for (int i = 0; i < khikhitas.size(); i++) {
+            System.out.printf("[%d] %s (ID: %s)%n", i, khikhitas.get(i).getNome(), khikhitas.get(i).getId());
+        }
+
+        System.out.print("Escolha o índice do Khikhita: ");
+        int index = Integer.parseInt(scanner.nextLine());
+
+        if (index < 0 || index >= khikhitas.size()) {
+            System.out.println("Índice inválido.");
+            return;
+        }
+
+        Khikhita k = khikhitas.get(index);
+
+        System.out.print("Novo nome da tabacaria (Enter para manter): ");
+        String novoNome = scanner.nextLine();
+        if (!novoNome.isBlank())
+            setPrivateField(k, "nome", novoNome);
+
+        // Atualizar funcionário
+        System.out.print("Novo nome do funcionário (Enter para manter): ");
+        String nomeFunc = scanner.nextLine();
+        if (!nomeFunc.isBlank())
+            k.getFuncionario().setNome(nomeFunc);
+
+        System.out.print("Novo contacto do funcionário (Enter para manter): ");
+        String contactoFunc = scanner.nextLine();
+        if (!contactoFunc.isBlank())
+            k.getFuncionario().setContacto(contactoFunc);
+
+        // Atualizar horário
+        System.out.print("Nova hora de abertura (HH:mm, Enter para manter): ");
+        String horaAbertura = scanner.nextLine();
+        if (!horaAbertura.isBlank()) {
+            k.setAbertura(LocalTime.parse(horaAbertura));
+        }
+
+        System.out.print("Nova hora de encerramento (HH:mm, Enter para manter): ");
+        String horaFecho = scanner.nextLine();
+        if (!horaFecho.isBlank()) {
+            k.setEncerramento(LocalTime.parse(horaFecho));
+        }
+
+        // Atualizar limites por tipo
+        System.out.println("Deseja alterar limites por tipo de caixa? (s/n)");
+        if (scanner.nextLine().trim().equalsIgnoreCase("s")) {
+            Map<String, Integer> novosLimites = new HashMap<>();
+            for (String tipo : k.getMaximoPorTipo().keySet()) {
+                System.out.printf("Novo limite para tipo %s (Enter para manter %d): ", tipo,
+                        k.getMaximoPorTipo().get(tipo));
+                String input = scanner.nextLine();
+                if (input.isBlank()) {
+                    novosLimites.put(tipo, k.getMaximoPorTipo().get(tipo));
+                } else {
+                    novosLimites.put(tipo, Integer.parseInt(input));
+                }
+            }
+            k.setMaximoPorTipo(novosLimites);
+        }
+
+        System.out.println("✅ Khikhita atualizado com sucesso.");
+    }
 
     /**
      * Verifica se o número máximo de caixas do tipo especificado foi atingido.
@@ -1101,7 +1215,7 @@ private static void editarKhikhita() {
         return data;
     }
 
-    private static void criarAgendamentoReal() {
+    static void criarAgendamentoReal() {
         if (utilizadores.size() < 2) {
             System.out.println("É necessário pelo menos dois utilizadores (cliente e parceiro).");
             return;
@@ -1116,72 +1230,36 @@ private static void editarKhikhita() {
 
         System.out.println("Escolher utilizador A (cliente):");
         Utilizador a = escolherUtilizador(tipo);
+        if (a == null) {
+            System.out.println("Utilizador A inválido. Operação cancelada.");
+            return;
+        }
+
         System.out.println("Escolher utilizador B (parceiro):");
-        Utilizador b = escolherUtilizador(tipo  );
+        Utilizador b = escolherUtilizador(tipo);
+        if (b == null) {
+            System.out.println("Utilizador B inválido. Operação cancelada.");
+            return;
+        }
 
-        String idQuiosque = "";
-        String idCompartimentoOuArea = "";
-
-        // Escolha e validação do tipo de quiosque
         switch (tipo) {
             case "1" -> {
-                if (khikhipas.isEmpty()) {
-                    System.out.println("Nenhum Khikhipa disponível.");
-                    return;
-                }
-                Khikhipa k = khikhipas.get(0);
-                Compartimento c = k.getCompartimentos().get(0);
-                idQuiosque = k.getId();
-                idCompartimentoOuArea = c.getId();
+                agendarKhikhipa(a, b);
+                return;
             }
-
             case "2" -> {
-                if (khikhitas.isEmpty()) {
-                    System.out.println("Nenhum Khikhita disponível.");
-                    return;
-                }
-                Khikhita k = khikhitas.get(0);
-                String tipoCaixa = "S"; // neste exemplo fixo
-                if (!podeAdicionarCaixaKhikhita(k, tipoCaixa)) {
-                    System.out.println("Limite de caixas tipo " + tipoCaixa + " atingido para este Khikhita.");
-                    return;
-                }
-                idQuiosque = k.getId();
-                idCompartimentoOuArea = "N/A";
+                agendarKhikhita(a, b);
+                return;
             }
-
             case "3" -> {
-                if (khikhivis.isEmpty()) {
-                    System.out.println("Nenhum Khikhivi disponível.");
-                    return;
-                }
-                Khikhivi k = khikhivis.get(0);
-                AreaTrabalho area = k.getAreasTrabalho().get(0); // exemplo: escolher primeira
-                if (!areaEstaOperacional(area)) {
-                    System.out.println("Área '" + area.getNome() + "' tem itens avariados. Agendamento impossível.");
-                    return;
-                }
-                idQuiosque = k.getId();
-                idCompartimentoOuArea = area.getNome();
+                agendarKhikhivi(a, b);
+                return;
             }
-
             default -> {
-                System.out.println("Tipo inválido.");
+                System.out.println("Tipo de quiosque inválido.");
                 return;
             }
         }
-
-        // Ler as datas com validação da ordem (entrega ≤ levantamento)
-        LocalDate e1 = lerDataComValidacao("Data entrega 1 (AAAA-MM-DD): ", null);
-        LocalDate l1 = lerDataComValidacao("Data levantamento 1 (AAAA-MM-DD): ", e1);
-        LocalDate e2 = lerDataComValidacao("Data entrega 2 (AAAA-MM-DD): ", null);
-        LocalDate l2 = lerDataComValidacao("Data levantamento 2 (AAAA-MM-DD): ", e2);
-
-        TicketAgendamento t = new TicketAgendamento(
-                idQuiosque, idCompartimentoOuArea, a.getNif(), b.getNif(),
-                "S", e1, l1, e2, l2);
-        agendamentos.add(t);
-        System.out.println("Agendamento criado com sucesso.");
     }
 
     private static void listarAgendamentos() {
@@ -1219,7 +1297,16 @@ private static void editarKhikhita() {
         }
 
         System.out.print("Escolha o agendamento para emitir recibo: ");
-        int index = Integer.parseInt(scanner.nextLine());
+        String input = scanner.nextLine().trim();
+        int index;
+
+        try {
+            index = Integer.parseInt(input);
+        } catch (NumberFormatException e) {
+            System.out.println("Erro: introduz um número válido.");
+            return;
+        }
+
         if (index < 0 || index >= agendamentos.size()) {
             System.out.println("Índice inválido.");
             return;
@@ -1246,7 +1333,34 @@ private static void editarKhikhita() {
 
         Recibo r = new Recibo("R" + (recibos.size() + 1), Config.DATA_HOJE, t, valores, iva, total);
         recibos.add(r);
-        System.out.println("Recibo emitido com total: " + total + " EUR");
+        System.out.println("Recibo emitido com total: " + String.format("%.2f", total) + " EUR");
+        guardarReciboEmTxt(r);
+
+    }
+
+    private static void guardarReciboEmTxt(Recibo recibo) {
+        String nomeFicheiro = "recibo_" + recibo.getId() + ".txt";
+
+        try (PrintWriter writer = new PrintWriter(nomeFicheiro)) {
+            writer.println("===== RECIBO EMITIDO =====");
+            writer.println("ID: " + recibo.getId());
+            writer.println("Data de Emissão: " + recibo.getDataEmissao());
+            writer.println("Quiosque: " + recibo.getTicket().getIdQuiosque());
+            writer.println("Utilizador A (cliente): " + recibo.getTicket().getIdSolicitante());
+            writer.println("Utilizador B (prestador): " + recibo.getTicket().getIdPrestador());
+            writer.println("Detalhes:");
+
+            for (Map.Entry<String, Double> entry : recibo.getValores().entrySet()) {
+                writer.printf(" - %s: %.2f €%n", entry.getKey(), entry.getValue());
+            }
+
+            writer.printf("IVA (23%%): %.2f €%n", recibo.getIva());
+            writer.printf("Total: %.2f €%n", recibo.getTotal());
+
+            System.out.println("Recibo gravado em: " + nomeFicheiro);
+        } catch (IOException e) {
+            System.out.println("Erro ao gravar o recibo em ficheiro: " + e.getMessage());
+        }
     }
 
     /**
@@ -1360,34 +1474,33 @@ private static void editarKhikhita() {
     // --------------------------Métodos de guardar
     // Dados--------------------------//
 
-   private static Utilizador escolherUtilizador(String titulo) {
-    if (utilizadores.isEmpty()) {
-        System.out.println("Nenhum utilizador disponível.");
-        return null;
-    }
-
-    System.out.println("Escolher " + titulo + ":");
-    for (int i = 0; i < utilizadores.size(); i++) {
-        System.out.println("[" + i + "] " + utilizadores.get(i).getNome());
-    }
-
-    System.out.print("Escolha: ");
-    try {
-        int index = Integer.parseInt(scanner.nextLine());
-
-        if (index < 0 || index >= utilizadores.size()) {
-            System.out.println("❌ Índice inválido.");
+    private static Utilizador escolherUtilizador(String titulo) {
+        if (utilizadores.isEmpty()) {
+            System.out.println("Nenhum utilizador disponível.");
             return null;
         }
 
-        return utilizadores.get(index);
+        System.out.println("Escolher " + titulo + ":");
+        for (int i = 0; i < utilizadores.size(); i++) {
+            System.out.println("[" + i + "] " + utilizadores.get(i).getNome());
+        }
 
-    } catch (NumberFormatException e) {
-        System.out.println("❌ Entrada inválida.");
-        return null;
+        System.out.print("Escolha: ");
+        try {
+            int index = Integer.parseInt(scanner.nextLine());
+
+            if (index < 0 || index >= utilizadores.size()) {
+                System.out.println("❌ Índice inválido.");
+                return null;
+            }
+
+            return utilizadores.get(index);
+
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Entrada inválida.");
+            return null;
+        }
     }
-}
-
 
     private static void guardarDados() {
         try (
