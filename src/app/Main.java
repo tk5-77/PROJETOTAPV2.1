@@ -908,8 +908,6 @@ public class Main {
         agendamentos.add(ticket);
         System.out.println("Agendamento em Khikhita criado com sucesso!");
     }
-
-    // --------------------------------------------------------------//
     // --------------------------Khikhitas--------------------------//
     /// Menu de gestão de Khikhitas
     /**
@@ -1365,7 +1363,7 @@ public class Main {
         }
     }
 
-    /**
+    /*
      * Gera um recibo com base no agendamento selecionado.
      * O recibo inclui os detalhes do agendamento e os valores associados.
      */

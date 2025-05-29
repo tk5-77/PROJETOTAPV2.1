@@ -1,0 +1,101 @@
+
+@startuml UMLDiagram
+
+' === UTILIZADORES ===
+class Utilizador {
+  - nome: String
+  - nif: String
+  - telefone: String
+}
+
+class Cliente extends Utilizador
+class Parceiro extends Utilizador
+
+' === MORADA E RESPONSAVEL ===
+class Morada {
+  - rua: String
+  - numero: int
+  - codigoPostal: String
+  - localidade: String
+}
+
+class Responsavel {
+  - nome: String
+  - telefone: String
+}
+
+' === QUIOSQUES BASE ===
+class Quiosque {
+  - id: String
+  - nome: String
+  - morada: Morada
+}
+
+class Khikhipa extends Quiosque {
+  - compartimentos: List<Compartimento>
+}
+
+class Khikhita extends Quiosque {
+  - caixas: List<Caixa>
+}
+
+class Khikhivi extends Quiosque {
+  - areasTrabalho: List<AreaTrabalho>
+  - responsavelManutencao: Responsavel
+  - responsavelHigiene: Responsavel
+}
+
+' === COMPONENTES DE QUIOSQUES ===
+class Compartimento {
+  - id: String
+  - linha: int
+  - coluna: int
+}
+
+class Caixa {
+  - tipo: String
+}
+
+class AreaTrabalho {
+  - nome: String
+  - itens: List<Item>
+}
+
+class Item {
+  - nome: String
+  - operacional: boolean
+}
+
+' === MODELOS AUXILIARES ===
+class TicketAgendamento {
+  - idQuiosque: String
+  - idAreaCompartimento: String
+  - nifCliente: String
+  - nifParceiro: String
+  - tipoCaixaOuArea: String
+  - data1: LocalDate
+  - data2: LocalDate
+  - data3: LocalDate
+  - data4: LocalDate
+}
+
+class Recibo {
+  - id: String
+  - data: LocalDate
+  - ticket: TicketAgendamento
+  - valores: Map<String, Double>
+  - iva: double
+  - total: double
+}
+
+' === RELAÇÕES ===
+Quiosque --> Morada
+Khikhivi --> Responsavel
+Khikhivi --> AreaTrabalho
+AreaTrabalho --> Item
+Khikhipa --> Compartimento
+Khikhita --> Caixa
+Recibo --> TicketAgendamento
+TicketAgendamento --> Utilizador
+
+@enduml
